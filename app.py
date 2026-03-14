@@ -8,7 +8,8 @@ import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'laundry_secret_key_2024'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@localhost/laundry_db'
+import os
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'mysql+pymysql://root:@localhost/laundry_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
