@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Order #{{ order.id }} — LaundryPro{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h2>📋 Order #{{ order.id }}</h2>
+    <p>Placed on {{ order.created_at.strftime('%d %B %Y at %I:%M %p') }}</p>
+  </div>
+
+  {% set statuses = ['Received', 'Picked Up', 'Washing', 'Drying', 'Ready', 'Delivered'] %}
+  {% set icons    = ['📥', '🚗', '💧', '💨', '✅', '🏠'] %}
+  {% set current_idx = statuses.index(order.status) if order.status in statuses else 0 %}
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header">Order Status</div>
+    <div class="card-body">
+      <div style="display:flex;gap:0;overflow-x:auto;">
+        {% for i, (s, ico) in enumerate(zip(statuses, icons)) %}
+        <div style="flex:1;text-align:center;padding:1rem 0.5rem;background:{% if loop.index0 < current_idx %}var(--primary){% elif loop.index0 == current_idx %}var(--accent){% else %}var(--bg){% endif %};color:{% if loop.index0 <= current_idx %}#fff{% else %}var(--muted){% endif %};border:1px solid var(--border);min-width:80px;font-size:0.78rem;font-weight:600;">
+          <div style="font-size:1.4rem;margin-bottom:0.25rem;">{{ ico }}</div>{{ s }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="align-items:start;">
+    <div class="card">
+      <div class="card-header">Items Ordered</div>
+      {% for item in order.items %}
+      <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:600;">{{ item.service.icon }} {{ item.service.name }}</div>
+          <div style="font-size:0.83rem;color:var(--muted);">{{ item.quantity }} {{ item.pricing_type }} × ₹{{ item.unit_price }}</div>
+        </div>
+        <strong style="color:var(--primary);">₹{{ "%.0f"|format(item.subtotal) }}</strong>
+      </div>
+      {% endfor %}
+      <div style="padding:1rem 1.5rem;display:flex;justify-content:space-between;">
+        <strong style="font-size:1.1rem;">Total</strong>
+        <strong style="font-size:1.3rem;color:var(--primary);">₹{{ "%.0f"|format(order.total_amount) }}</strong>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Order Details</div>
+      <div class="card-body">
+        <table style="font-size:0.92rem;">
+          <tr><td style="padding:0.5rem 0;color:var(--muted);width:40%;">Pickup Date</td><td><strong>{{ order.pickup_date.strftime('%d %B %Y') if order.pickup_date else '—' }}</strong></td></tr>
+          <tr><td style="padding:0.5rem 0;color:var(--muted);">Delivery Date</td><td><strong>{{ order.delivery_date.strftime('%d %B %Y') if order.delivery_date else '—' }}</strong></td></tr>
+          <tr><td style="padding:0.5rem 0;color:var(--muted);">Status</td><td><span class="badge badge-{{ order.status.lower().replace(' ','') }}">{{ order.status }}</span></td></tr>
+          <tr><td style="padding:0.5rem 0;color:var(--muted);">Customer IP</td><td><code style="font-size:0.83rem;background:var(--bg);padding:0.2rem 0.4rem;border-radius:4px;">{{ order.customer_ip or 'N/A' }}</code></td></tr>
+          {% if order.notes %}
+          <tr><td style="padding:0.5rem 0;color:var(--muted);">Notes</td><td>{{ order.notes }}</td></tr>
+          {% endif %}
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:1.5rem;">
+    <a href="{{ url_for('my_orders') }}" class="btn btn-outline">← Back to Orders</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}My Orders — LaundryPro{% endblock %}
+{% block extra_css %}
+<style>
+.status-track { display: flex; gap: 0; margin: 1.5rem 0; overflow-x: auto; }
+.track-step {
+  flex: 1; text-align: center; padding: 0.75rem 0.5rem;
+  font-size: 0.78rem; font-weight: 600;
+  background: var(--bg); border: 1px solid var(--border);
+  position: relative; min-width: 90px;
+}
+.track-step.done { background: var(--primary); color: #fff; border-color: var(--primary); }
+.track-step.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.track-step .icon { display: block; font-size: 1.3rem; margin-bottom: 0.25rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header"><h2>📦 My Orders</h2><p>Track all your laundry orders</p></div>
+  {% if orders %}
+  <div class="card">
+    <table>
+      <thead><tr>
+        <th>Order #</th><th>Date</th><th>Items</th><th>Total</th><th>Pickup</th><th>Delivery</th><th>Status</th><th>Action</th>
+      </tr></thead>
+      <tbody>
+        {% for o in orders %}
+        {% set status_map = {'Received':0,'Picked Up':1,'Washing':2,'Drying':3,'Ready':4,'Delivered':5} %}
+        {% set badge_map = {'Received':'received','Picked Up':'picked','Washing':'washing','Drying':'drying','Ready':'ready','Delivered':'delivered'} %}
+        <tr>
+          <td><strong>#{{ o.id }}</strong></td>
+          <td>{{ o.created_at.strftime('%d %b %Y') }}</td>
+          <td>{{ o.items|length }} item(s)</td>
+          <td><strong>₹{{ "%.0f"|format(o.total_amount) }}</strong></td>
+          <td>{{ o.pickup_date.strftime('%d %b') if o.pickup_date else '—' }}</td>
+          <td>{{ o.delivery_date.strftime('%d %b') if o.delivery_date else '—' }}</td>
+          <td><span class="badge badge-{{ badge_map.get(o.status, 'received') }}">{{ o.status }}</span></td>
+          <td><a href="{{ url_for('order_detail', order_id=o.id) }}" class="btn btn-sm btn-outline">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:4rem;">
+    <div style="font-size:4rem;">📭</div>
+    <h3 style="margin:1rem 0 0.5rem;">No orders yet</h3>
+    <p style="color:var(--muted);margin-bottom:1.5rem;">Place your first laundry order!</p>
+    <a href="{{ url_for('services') }}" class="btn btn-primary">Start Order</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

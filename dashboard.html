@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard — LaundryPro{% endblock %}
+{% block extra_css %}
+<style>
+.stat-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 1.5rem; border: 1px solid var(--border);
+  display: flex; align-items: center; gap: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.stat-icon {
+  width: 58px; height: 58px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; flex-shrink: 0;
+}
+.stat-info .num { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 800; line-height: 1; }
+.stat-info .label { font-size: 0.82rem; color: var(--muted); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.admin-nav {
+  display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap;
+}
+.admin-nav a {
+  padding: 0.5rem 1.1rem; border-radius: 8px; font-weight: 600;
+  font-size: 0.88rem; text-decoration: none;
+  background: var(--card); color: var(--muted);
+  border: 1px solid var(--border); transition: all 0.2s;
+}
+.admin-nav a:hover, .admin-nav a.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.ip-chip {
+  background: #1e293b; color: #94a3b8;
+  font-family: monospace; font-size: 0.78rem;
+  padding: 0.2rem 0.5rem; border-radius: 5px;
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h2>🛡️ Admin Dashboard</h2>
+    <p>Manage orders, customers, and services</p>
+  </div>
+
+  <div class="admin-nav">
+    <a href="{{ url_for('admin_dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> Overview</a>
+    <a href="{{ url_for('admin_orders') }}"><i class="fas fa-box"></i> Orders</a>
+    <a href="{{ url_for('admin_customers') }}"><i class="fas fa-users"></i> Customers</a>
+    <a href="{{ url_for('admin_services') }}"><i class="fas fa-concierge-bell"></i> Services</a>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="grid-4" style="margin-bottom:2rem;">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#EFF6FF;"><span>📦</span></div>
+      <div class="stat-info"><div class="num">{{ total_orders }}</div><div class="label">Total Orders</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#F0FDF4;"><span>💰</span></div>
+      <div class="stat-info"><div class="num">₹{{ "%.0f"|format(total_revenue) }}</div><div class="label">Total Revenue</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#FEF3C7;"><span>⏳</span></div>
+      <div class="stat-info"><div class="num">{{ pending_orders }}</div><div class="label">Pending Orders</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#F5F3FF;"><span>👥</span></div>
+      <div class="stat-info"><div class="num">{{ total_customers }}</div><div class="label">Customers</div></div>
+    </div>
+  </div>
+
+  <!-- STATUS BREAKDOWN -->
+  <div class="grid-2" style="margin-bottom:2rem;align-items:start;">
+    <div class="card">
+      <div class="card-header">📊 Order Status Breakdown</div>
+      <div class="card-body">
+        {% set status_colors = {'Received':'#3B82F6','Picked Up':'#F59E0B','Washing':'#8B5CF6','Drying':'#EF4444','Ready':'#10B981','Delivered':'#059669'} %}
+        {% for status, count in status_counts.items() %}
+        <div style="margin-bottom:0.85rem;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;font-size:0.88rem;">
+            <span style="font-weight:600;">{{ status }}</span>
+            <span>{{ count }}</span>
+          </div>
+          <div style="height:8px;background:var(--bg);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:{% if total_orders > 0 %}{{ (count / total_orders * 100)|round }}%{% else %}0%{% endif %};background:{{ status_colors.get(status, '#3B82F6') }};border-radius:4px;transition:width 0.5s;"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- RECENT ORDERS -->
+    <div class="card">
+      <div class="card-header">🕐 Recent Orders <a href="{{ url_for('admin_orders') }}" class="btn btn-sm btn-outline">View All</a></div>
+      {% for o in recent_orders %}
+      {% set badge_map = {'Received':'received','Picked Up':'picked','Washing':'washing','Drying':'drying','Ready':'ready','Delivered':'delivered'} %}
+      <div style="padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-weight:600;font-size:0.92rem;">#{{ o.id }} — {{ o.customer.name }}</div>
+          <div style="font-size:0.78rem;color:var(--muted);">{{ o.created_at.strftime('%d %b %Y %H:%M') }} &nbsp;·&nbsp; <span class="ip-chip">{{ o.customer_ip or 'N/A' }}</span></div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:700;color:var(--primary);">₹{{ "%.0f"|format(o.total_amount) }}</div>
+          <span class="badge badge-{{ badge_map.get(o.status, 'received') }}" style="font-size:0.72rem;">{{ o.status }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- CUSTOMER IP TABLE -->
+  <div class="card">
+    <div class="card-header">🌐 Customer IP Address Log <a href="{{ url_for('admin_customers') }}" class="btn btn-sm btn-outline">Full List</a></div>
+    <table>
+      <thead><tr><th>Customer</th><th>Email</th><th>Phone</th><th>IP Address</th><th>Last Login</th><th>Registered</th><th>Orders</th></tr></thead>
+      <tbody>
+        {% for c in customers[:8] %}
+        <tr>
+          <td><strong>{{ c.name }}</strong></td>
+          <td style="color:var(--muted);">{{ c.email }}</td>
+          <td>{{ c.phone or '—' }}</td>
+          <td><span class="ip-chip">{{ c.ip_address or 'N/A' }}</span></td>
+          <td style="font-size:0.83rem;color:var(--muted);">{{ c.last_login.strftime('%d %b %H:%M') if c.last_login else 'Never' }}</td>
+          <td style="font-size:0.83rem;color:var(--muted);">{{ c.created_at.strftime('%d %b %Y') }}</td>
+          <td><span class="badge badge-received">{{ c.orders|length }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

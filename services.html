@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Services — LaundryPro{% endblock %}
+{% block extra_css %}
+<style>
+.service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+.svc-card {
+  background: var(--card); border-radius: var(--radius);
+  border: 2px solid var(--border); overflow: hidden;
+  transition: all 0.25s; display: flex; flex-direction: column;
+}
+.svc-card:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateY(-3px); }
+.svc-top { padding: 1.5rem; text-align: center; background: linear-gradient(135deg, #F0F4FF, #E8F5FF); }
+.svc-top .icon { font-size: 3rem; }
+.svc-body { padding: 1.25rem; flex: 1; }
+.svc-body h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem; }
+.svc-body p { color: var(--muted); font-size: 0.87rem; line-height: 1.5; margin-bottom: 1rem; }
+.price-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.price-tag {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.3rem 0.7rem;
+  font-size: 0.82rem; font-weight: 600; color: var(--primary);
+}
+.svc-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
+.add-form { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.qty-input { width: 70px; padding: 0.4rem 0.6rem; font-size: 0.88rem; }
+.type-select { padding: 0.4rem 0.6rem; font-size: 0.88rem; border-radius: 7px; flex: 1; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h2>🧺 Our Services</h2>
+    <p>Choose your garments and add them to cart</p>
+  </div>
+
+  <div class="service-grid">
+    {% for s in services %}
+    <div class="svc-card">
+      <div class="svc-top"><div class="icon">{{ s.icon }}</div></div>
+      <div class="svc-body">
+        <h3>{{ s.name }}</h3>
+        <p>{{ s.description }}</p>
+        <div class="price-row">
+          {% if s.price_per_piece > 0 %}<span class="price-tag">₹{{ s.price_per_piece }} / piece</span>{% endif %}
+          {% if s.price_per_kg > 0 %}<span class="price-tag">₹{{ s.price_per_kg }} / kg</span>{% endif %}
+        </div>
+      </div>
+      <div class="svc-footer">
+        {% if current_user.is_authenticated %}
+        <form method="POST" action="{{ url_for('add_to_cart') }}" class="add-form">
+          <input type="hidden" name="service_id" value="{{ s.id }}"/>
+          <input type="number" name="quantity" value="1" min="0.5" step="0.5" class="qty-input" placeholder="Qty"/>
+          <select name="pricing_type" class="type-select">
+            {% if s.price_per_piece > 0 %}<option value="piece">Per Piece</option>{% endif %}
+            {% if s.price_per_kg > 0 %}<option value="kg">Per Kg</option>{% endif %}
+          </select>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-cart-plus"></i> Add</button>
+        </form>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="btn btn-outline" style="width:100%;justify-content:center;">Login to Order</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

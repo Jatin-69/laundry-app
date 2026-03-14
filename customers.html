@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Customers — Admin{% endblock %}
+{% block extra_css %}
+<style>
+.admin-nav { display:flex;gap:0.5rem;margin-bottom:2rem;flex-wrap:wrap; }
+.admin-nav a { padding:0.5rem 1.1rem;border-radius:8px;font-weight:600;font-size:0.88rem;text-decoration:none;background:var(--card);color:var(--muted);border:1px solid var(--border);transition:all 0.2s; }
+.admin-nav a:hover,.admin-nav a.active { background:var(--primary);color:#fff;border-color:var(--primary); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header"><h2>👥 All Customers</h2><p>IP addresses and login history visible</p></div>
+  <div class="admin-nav">
+    <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Overview</a>
+    <a href="{{ url_for('admin_orders') }}"><i class="fas fa-box"></i> Orders</a>
+    <a href="{{ url_for('admin_customers') }}" class="active"><i class="fas fa-users"></i> Customers</a>
+    <a href="{{ url_for('admin_services') }}"><i class="fas fa-concierge-bell"></i> Services</a>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>IP Address</th><th>Address</th><th>Last Login</th><th>Joined</th><th>Orders</th></tr></thead>
+      <tbody>
+        {% for c in customers %}
+        <tr>
+          <td style="color:var(--muted);">{{ loop.index }}</td>
+          <td><strong>{{ c.name }}</strong></td>
+          <td style="color:var(--muted);font-size:0.88rem;">{{ c.email }}</td>
+          <td>{{ c.phone or '—' }}</td>
+          <td>
+            <code style="background:#1e293b;color:#94a3b8;padding:0.25rem 0.6rem;border-radius:5px;font-size:0.78rem;display:inline-flex;align-items:center;gap:0.3rem;">
+              🌐 {{ c.ip_address or 'N/A' }}
+            </code>
+          </td>
+          <td style="font-size:0.82rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.address or '—' }}</td>
+          <td style="font-size:0.82rem;color:var(--muted);">{{ c.last_login.strftime('%d %b %Y %H:%M') if c.last_login else 'Never' }}</td>
+          <td style="font-size:0.82rem;color:var(--muted);">{{ c.created_at.strftime('%d %b %Y') }}</td>
+          <td><span class="badge badge-received" style="background:#EFF6FF;">{{ c.orders|length }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

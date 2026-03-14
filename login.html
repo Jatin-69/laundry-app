@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Login — LaundryPro{% endblock %}
+{% block extra_css %}
+<style>
+.auth-wrap { min-height: calc(100vh - 68px); display: flex; align-items: center; justify-content: center; padding: 2rem; }
+.auth-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem; width: 100%; max-width: 420px; border: 1px solid var(--border); }
+.auth-logo { text-align: center; margin-bottom: 2rem; }
+.auth-logo .icon { font-size: 3rem; }
+.auth-logo h2 { font-size: 1.6rem; font-weight: 800; margin-top: 0.5rem; }
+.auth-logo p { color: var(--muted); font-size: 0.88rem; }
+.divider { text-align: center; color: var(--muted); font-size: 0.85rem; margin: 1rem 0; position: relative; }
+.divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: var(--border); }
+.divider::before { left: 0; } .divider::after { right: 0; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="icon">🧺</div>
+      <h2>Welcome Back</h2>
+      <p>Login to your LaundryPro account</p>
+    </div>
+    <form method="POST">
+      <div class="form-group">
+        <label><i class="fas fa-envelope"></i> Email</label>
+        <input type="email" name="email" placeholder="your@email.com" required/>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-lock"></i> Password</label>
+        <input type="password" name="password" placeholder="Enter password" required/>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:0.8rem;font-size:1rem;margin-top:0.5rem;">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </button>
+    </form>
+    <div class="divider">or</div>
+    <p style="text-align:center;font-size:0.9rem;color:var(--muted);">Don't have an account? <a href="{{ url_for('register') }}" style="color:var(--primary);font-weight:600;">Register here</a></p>
+    <p style="text-align:center;font-size:0.8rem;color:var(--muted);margin-top:1rem;">Admin: admin@laundry.com / admin123</p>
+  </div>
+</div>
+{% endblock %}
