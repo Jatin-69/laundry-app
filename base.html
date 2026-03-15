@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}LaundryPro{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>emailjs.init("6lt3TjJRAebGY9-Va");</script>
+  <style>
+    :root {
+      --primary: #0047AB;
+      --primary-light: #1E6FE8;
+      --accent: #00C2CB;
+      --bg: #F0F4FF;
+      --card: #FFFFFF;
+      --text: #111827;
+      --muted: #6B7280;
+      --border: #E5E9F5;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(0,71,171,0.10);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    h1, h2, h3, h4, h5 { font-family: 'Syne', sans-serif; }
+    nav {
+      background: var(--card);
+      border-bottom: 2px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 68px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .nav-brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; align-items: center; gap: 0.5rem; }
+    .nav-links a { padding: 0.45rem 1rem; border-radius: 8px; text-decoration: none; color: var(--muted); font-weight: 500; font-size: 0.92rem; transition: all 0.2s; }
+    .nav-links a:hover { background: var(--bg); color: var(--primary); }
+    .cart-badge { background: var(--primary); color: #fff; border-radius: 999px; padding: 0.4rem 0.85rem; font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 0.4rem; }
+    .cart-badge:hover { background: var(--primary-light); color: #fff !important; }
+    .btn-admin { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff !important; padding: 0.4rem 1rem; border-radius: 8px; font-weight: 600; }
+    .flash-container { padding: 0.75rem 2rem 0; }
+    .alert { padding: 0.85rem 1.25rem; border-radius: var(--radius); margin-bottom: 0.5rem; font-weight: 500; font-size: 0.93rem; display: flex; align-items: center; gap: 0.6rem; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform: translateY(0); } }
+    .alert-success { background: #D1FAE5; color: #065F46; border-left: 4px solid var(--success); }
+    .alert-danger  { background: #FEE2E2; color: #991B1B; border-left: 4px solid var(--danger); }
+    .alert-warning { background: #FEF3C7; color: #92400E; border-left: 4px solid var(--warning); }
+    .alert-info    { background: #DBEAFE; color: #1E40AF; border-left: 4px solid var(--primary); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .page-header { margin-bottom: 2rem; }
+    .page-header h2 { font-size: 2rem; font-weight: 800; color: var(--text); }
+    .page-header p { color: var(--muted); margin-top: 0.3rem; }
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
+    .card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); font-weight: 700; font-family: 'Syne', sans-serif; font-size: 1.05rem; display: flex; align-items: center; justify-content: space-between; }
+    .card-body { padding: 1.5rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1.25rem; border-radius: 9px; font-weight: 600; font-size: 0.9rem; text-decoration: none; border: none; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-light); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .btn-outline:hover { background: var(--primary); color: #fff; }
+    .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.82rem; }
+    .badge { display: inline-block; padding: 0.28rem 0.75rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+    .badge-received  { background: #DBEAFE; color: #1E40AF; }
+    .badge-picked    { background: #FEF3C7; color: #92400E; }
+    .badge-washing   { background: #EDE9FE; color: #6D28D9; }
+    .badge-drying    { background: #FEE2E2; color: #991B1B; }
+    .badge-ready     { background: #D1FAE5; color: #065F46; }
+    .badge-delivered { background: #6EE7B7; color: #064E3B; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: var(--bg); }
+    th { padding: 0.85rem 1rem; text-align: left; font-size: 0.83rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
+    td { padding: 0.9rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.93rem; }
+    tr:last-child td { border-bottom: none; }
+    .form-group { margin-bottom: 1.25rem; }
+    label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--text); }
+    input, select, textarea { width: 100%; padding: 0.65rem 1rem; border: 2px solid var(--border); border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: 0.93rem; background: var(--bg); transition: border 0.2s; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; }
+    footer { background: var(--text); color: #9CA3AF; text-align: center; padding: 1.5rem; margin-top: 4rem; font-size: 0.88rem; }
+    footer strong { color: #fff; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+
+    /* CONTACT WIDGET */
+    .contact-float { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; }
+    .contact-btn { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; border: none; cursor: pointer; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(0,71,171,0.4); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+    .contact-btn:hover { transform: scale(1.1); }
+    .contact-popup { display: none; position: absolute; bottom: 75px; right: 0; width: 320px; background: var(--card); border-radius: var(--radius); box-shadow: 0 8px 40px rgba(0,0,0,0.15); border: 1px solid var(--border); overflow: hidden; }
+    .contact-popup.show { display: block; animation: slideIn 0.3s ease; }
+    .contact-popup-header { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; padding: 1rem 1.25rem; font-family: 'Syne', sans-serif; font-weight: 700; }
+    .contact-popup-body { padding: 1.25rem; }
+    .contact-popup-body input, .contact-popup-body textarea { margin-bottom: 0.75rem; }
+    .contact-popup-body textarea { height: 80px; resize: none; }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      nav { padding: 0 1rem; }
+      .container { padding: 1rem; }
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+<nav>
+  <a href="{{ url_for('index') }}" class="nav-brand">🧺 Laundry<span>Pro</span></a>
+  <div class="nav-links">
+    <a href="{{ url_for('services') }}"><i class="fas fa-concierge-bell"></i> Services</a>
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('my_orders') }}"><i class="fas fa-box-open"></i> My Orders</a>
+      <a href="{{ url_for('cart') }}" class="cart-badge">
+        <i class="fas fa-shopping-cart"></i> Cart
+        {% set count = get_cart_count() %}
+        {% if count > 0 %}<span style="background:#00C2CB;padding:1px 8px;border-radius:999px;font-size:0.78rem;">{{ count }}</span>{% endif %}
+      </a>
+      {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}" class="btn-admin"><i class="fas fa-shield-alt"></i> Admin</a>
+      {% endif %}
+      <a href="{{ url_for('logout') }}" style="color:var(--danger);"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Login</a>
+      <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Register</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="flash-container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">
+        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+{% block content %}{% endblock %}
+
+<!-- CONTACT FLOAT BUTTON -->
+<div class="contact-float">
+  <div class="contact-popup" id="contactPopup">
+    <div class="contact-popup-header">
+      💬 Contact Us — LaundryPro
+    </div>
+    <div class="contact-popup-body">
+      <input type="text" id="contact_name" placeholder="Aapka naam" />
+      <input type="email" id="contact_email" placeholder="Aapka email" />
+      <textarea id="contact_message" placeholder="Kya madad chahiye?"></textarea>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="sendContactEmail()">
+        <i class="fas fa-paper-plane"></i> Bhejo
+      </button>
+      <div id="contact_status" style="margin-top:0.5rem;font-size:0.85rem;text-align:center;"></div>
+    </div>
+  </div>
+  <button class="contact-btn" onclick="toggleContact()">
+    <i class="fas fa-comments"></i>
+  </button>
+</div>
+
+<footer>
+  <strong>🧺 LaundryPro</strong> — Modern Laundry Management System
+</footer>
+
+<script>
+function toggleContact() {
+  document.getElementById('contactPopup').classList.toggle('show');
+}
+
+function sendContactEmail() {
+  const name = document.getElementById('contact_name').value;
+  const email = document.getElementById('contact_email').value;
+  const message = document.getElementById('contact_message').value;
+  const status = document.getElementById('contact_status');
+
+  if (!name || !email || !message) {
+    status.innerHTML = '<span style="color:red;">Sab fields fill karo!</span>';
+    return;
+  }
+
+  status.innerHTML = 'Bhej raha hoon...';
+
+  emailjs.send('service_ymy77np', 'd35bbzs', {
+    to_email: 'jatinparmar2005250@gmail.com',
+    from_name: name,
+    from_email: email,
+    message: message,
+    order_id: 'Contact Form',
+    email: 'jatinparmar2005250@gmail.com'
+  }).then(function() {
+    status.innerHTML = '<span style="color:green;">✅ Message bhej diya! Hum jald reply karenge.</span>';
+    document.getElementById('contact_name').value = '';
+    document.getElementById('contact_email').value = '';
+    document.getElementById('contact_message').value = '';
+  }, function(error) {
+    status.innerHTML = '<span style="color:red;">Error aaya, dobara try karo!</span>';
+  });
+}
+</script>
+</body>
+</html>

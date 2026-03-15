@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Checkout — LaundryPro{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header"><h2>📦 Checkout</h2><p>Confirm your order details</p></div>
+  <div class="grid-2" style="align-items:start;">
+    <div class="card">
+      <div class="card-header">Schedule Pickup & Delivery</div>
+      <div class="card-body">
+        <form method="POST" onsubmit="sendOrderEmail()">
+          <div class="form-group">
+            <label>📅 Pickup Date</label>
+            <input type="date" name="pickup_date" id="pickup_date" min="{{ min_pickup }}" required/>
+          </div>
+          <div class="form-group">
+            <label>🚚 Delivery Date</label>
+            <input type="date" name="delivery_date" id="delivery_date" min="{{ min_delivery }}" required/>
+          </div>
+          <div class="form-group">
+            <label>📝 Special Instructions (Optional)</label>
+            <textarea name="notes" rows="3" placeholder="Any special care instructions..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>📍 Delivery Address</label>
+            <textarea name="address" rows="2">{{ current_user.address or '' }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:0.9rem;font-size:1rem;">
+            <i class="fas fa-check-circle"></i> Place Order — ₹{{ "%.0f"|format(total) }}
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Order Summary</div>
+      <div class="card-body">
+        {% for item in items %}
+        <div style="display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid var(--border);font-size:0.92rem;">
+          <span>{{ item.service.icon }} {{ item.service.name }} (×{{ item.quantity }} {{ item.pricing_type }})</span>
+          <span style="font-weight:600;">₹{{ "%.0f"|format((item.service.price_per_kg if item.pricing_type == 'kg' else item.service.price_per_piece) * item.quantity) }}</span>
+        </div>
+        {% endfor %}
+        <div style="display:flex;justify-content:space-between;margin-top:1rem;font-size:1.1rem;">
+          <strong>Total</strong>
+          <strong style="color:var(--primary);font-size:1.4rem;">₹{{ "%.0f"|format(total) }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function sendOrderEmail() {
+  emailjs.send('service_ymy77np', 'd35bbzs', {
+    to_email: 'jatinparmar2005250@gmail.com',
+    email: 'jatinparmar2005250@gmail.com',
+    from_name: '{{ current_user.name }}',
+    from_email: '{{ current_user.email }}',
+    order_id: 'New Order',
+    message: 'Customer: {{ current_user.name }}\nEmail: {{ current_user.email }}\nPhone: {{ current_user.phone or "N/A" }}\nTotal: ₹{{ "%.0f"|format(total) }}\nIP: {{ request.remote_addr }}'
+  });
+}
+</script>
+{% endblock %}

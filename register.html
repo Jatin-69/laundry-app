@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Register — LaundryPro{% endblock %}
+{% block extra_css %}
+<style>
+.auth-wrap { min-height: calc(100vh - 68px); display: flex; align-items: center; justify-content: center; padding: 2rem; }
+.auth-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem; width: 100%; max-width: 480px; border: 1px solid var(--border); }
+.auth-logo { text-align: center; margin-bottom: 2rem; }
+.auth-logo .icon { font-size: 3rem; }
+.auth-logo h2 { font-size: 1.6rem; font-weight: 800; margin-top: 0.5rem; }
+.auth-logo p { color: var(--muted); font-size: 0.88rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="icon">🧺</div>
+      <h2>Create Account</h2>
+      <p>Join LaundryPro for fresh clothes!</p>
+    </div>
+    <form method="POST" onsubmit="sendRegisterEmail(this)">
+      <div class="grid-2" style="gap:1rem;">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" name="name" id="reg_name" placeholder="Rahul Kumar" required/>
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" name="phone" placeholder="+91 98765 43210"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" id="reg_email" placeholder="your@email.com" required/>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <textarea name="address" rows="2" placeholder="Your delivery address..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Min 6 characters" required/>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:0.8rem;font-size:1rem;">
+        <i class="fas fa-user-plus"></i> Create Account
+      </button>
+    </form>
+    <p style="text-align:center;font-size:0.9rem;color:var(--muted);margin-top:1.25rem;">Already have an account? <a href="{{ url_for('login') }}" style="color:var(--primary);font-weight:600;">Login here</a></p>
+  </div>
+</div>
+
+<script>
+function sendRegisterEmail(form) {
+  const name = document.getElementById('reg_name').value;
+  const email = document.getElementById('reg_email').value;
+  emailjs.send('service_ymy77np', 'd35bbzs', {
+    to_email: 'jatinparmar2005250@gmail.com',
+    email: 'jatinparmar2005250@gmail.com',
+    from_name: name,
+    from_email: email,
+    order_id: 'NEW REGISTRATION',
+    message: 'Naya customer register hua!\nNaam: ' + name + '\nEmail: ' + email
+  });
+}
+</script>
+{% endblock %}
