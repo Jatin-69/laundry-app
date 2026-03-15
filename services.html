@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Services — Admin{% endblock %}
+{% block extra_css %}
+<style>
+.admin-nav { display:flex;gap:0.5rem;margin-bottom:2rem;flex-wrap:wrap; }
+.admin-nav a { padding:0.5rem 1.1rem;border-radius:8px;font-weight:600;font-size:0.88rem;text-decoration:none;background:var(--card);color:var(--muted);border:1px solid var(--border);transition:all 0.2s; }
+.admin-nav a:hover,.admin-nav a.active { background:var(--primary);color:#fff;border-color:var(--primary); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header"><h2>🧺 Manage Services</h2></div>
+  <div class="admin-nav">
+    <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Overview</a>
+    <a href="{{ url_for('admin_orders') }}"><i class="fas fa-box"></i> Orders</a>
+    <a href="{{ url_for('admin_customers') }}"><i class="fas fa-users"></i> Customers</a>
+    <a href="{{ url_for('admin_services') }}" class="active"><i class="fas fa-concierge-bell"></i> Services</a>
+  </div>
+
+  <div class="grid-2" style="align-items:start;">
+    <div class="card">
+      <div class="card-header">➕ Add New Service</div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="form-group"><label>Service Name</label><input type="text" name="name" placeholder="e.g. Kurta Wash & Iron" required/></div>
+          <div class="grid-2" style="gap:1rem;">
+            <div class="form-group">
+              <label>Category</label>
+              <select name="category">
+                <option value="wash">Wash</option>
+                <option value="dry_clean">Dry Clean</option>
+                <option value="iron">Iron</option>
+                <option value="wash_iron">Wash + Iron</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Icon (Emoji)</label><input type="text" name="icon" placeholder="👔" maxlength="4"/></div>
+          </div>
+          <div class="form-group"><label>Description</label><textarea name="description" rows="2"></textarea></div>
+          <div class="grid-2" style="gap:1rem;">
+            <div class="form-group"><label>Price per Piece (₹)</label><input type="number" name="price_per_piece" step="0.5" min="0" placeholder="0"/></div>
+            <div class="form-group"><label>Price per Kg (₹)</label><input type="number" name="price_per_kg" step="0.5" min="0" placeholder="0"/></div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Add Service</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">All Services</div>
+      <table>
+        <thead><tr><th>Icon</th><th>Name</th><th>/Piece</th><th>/Kg</th><th>Status</th><th>Toggle</th></tr></thead>
+        <tbody>
+          {% for s in services %}
+          <tr>
+            <td style="font-size:1.5rem;">{{ s.icon }}</td>
+            <td><strong>{{ s.name }}</strong><br/><span style="font-size:0.78rem;color:var(--muted);">{{ s.category }}</span></td>
+            <td>{% if s.price_per_piece > 0 %}₹{{ s.price_per_piece }}{% else %}—{% endif %}</td>
+            <td>{% if s.price_per_kg > 0 %}₹{{ s.price_per_kg }}{% else %}—{% endif %}</td>
+            <td>
+              {% if s.is_active %}<span class="badge badge-ready">Active</span>
+              {% else %}<span class="badge badge-drying">Inactive</span>{% endif %}
+            </td>
+            <td><a href="{{ url_for('toggle_service', sid=s.id) }}" class="btn btn-sm {% if s.is_active %}btn-danger{% else %}btn-success{% endif %}">{{ '🔴 Off' if s.is_active else '🟢 On' }}</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
