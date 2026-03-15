@@ -5,23 +5,16 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from functools import wraps
 import json
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'laundry_secret_key_2024'
-import os
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'mysql+pymysql://root:@localhost/laundry_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-
-with app.app_context():
-    db.create_all()
-    seed_data()
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
 
 # ─── MODELS ───────────────────────────────────────────────────────────────────
 
@@ -33,7 +26,7 @@ class User(UserMixin, db.Model):
     phone = db.Column(db.String(15))
     address = db.Column(db.Text)
     password_hash = db.Column(db.String(256))
-    role = db.Column(db.String(20), default='customer')  # customer / admin
+    role = db.Column(db.String(20), default='customer')
     ip_address = db.Column(db.String(50))
     last_login = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -50,7 +43,7 @@ class Service(db.Model):
     __tablename__ = 'services'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    category = db.Column(db.String(50))  # wash / dry_clean / iron / wash_iron
+    category = db.Column(db.String(50))
     description = db.Column(db.Text)
     price_per_piece = db.Column(db.Float, default=0)
     price_per_kg = db.Column(db.Float, default=0)
@@ -64,7 +57,7 @@ class CartItem(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey('services.id'), nullable=False)
     quantity = db.Column(db.Float, default=1)
-    pricing_type = db.Column(db.String(10), default='piece')  # piece / kg
+    pricing_type = db.Column(db.String(10), default='piece')
     service = db.relationship('Service')
 
 
@@ -74,7 +67,6 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     total_amount = db.Column(db.Float, default=0)
     status = db.Column(db.String(30), default='Received')
-    # Status flow: Received → Picked Up → Washing → Drying → Ready → Delivered
     pickup_date = db.Column(db.DateTime)
     delivery_date = db.Column(db.DateTime)
     notes = db.Column(db.Text)
@@ -269,7 +261,7 @@ def checkout():
         order.total_amount = total
         CartItem.query.filter_by(user_id=current_user.id).delete()
         db.session.commit()
-        flash(f'Order #{order.id} placed successfully! 🎉', 'success')
+        flash(f'Order #{order.id} placed successfully!', 'success')
         return redirect(url_for('my_orders'))
 
     total = sum(
@@ -377,7 +369,7 @@ def toggle_service(sid):
     db.session.commit()
     return redirect(url_for('admin_services'))
 
-# ─── INIT DB & SEED ───────────────────────────────────────────────────────────
+# ─── SEED DATA ────────────────────────────────────────────────────────────────
 
 def seed_data():
     if not User.query.filter_by(email='admin@laundry.com').first():
@@ -399,8 +391,11 @@ def seed_data():
         db.session.add_all(services)
     db.session.commit()
 
+# ─── INIT ─────────────────────────────────────────────────────────────────────
+
+with app.app_context():
+    db.create_all()
+    seed_data()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        seed_data()
     app.run(debug=True, port=5000)
